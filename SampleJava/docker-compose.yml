@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+
+  # ─────────────────────────────────────────
+  # Your Spring Boot App
+  # ─────────────────────────────────────────
+  app:
+    build: .                        # Build from Dockerfile in this folder
+    container_name: product-app
+    ports:
+      - "8080:8080"                 # host:container
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/productdb   # 'db' = service name below
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      db:
+        condition: service_healthy  # Wait until Postgres is ready before starting app
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────
+  # PostgreSQL Database
+  # ─────────────────────────────────────────
+  db:
+    image: postgres:16.2-alpine3.18
+    container_name: product-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: productdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pg_data:/var/lib/postgresql/data   # Persist data between restarts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d productdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+# Named volume so DB data isn't lost when container stops
+volumes:
+  pg_data:

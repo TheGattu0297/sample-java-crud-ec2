@@ -1,0 +1,16 @@
+# ─────────────────────────────────────────
+# .gitignore for Terraform
+# Never commit these to GitHub!
+# ─────────────────────────────────────────
+
+# Terraform state files (contains sensitive data!)
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Variables file (contains passwords!)
+terraform.tfvars
+
+# SSH keys
+*.pem
